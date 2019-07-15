@@ -65,7 +65,7 @@ namespace AsanaWebhookAPITesting.Controllers
         //}
 
         [HttpPost]
-        public  void Post()
+        public void Post()
         {
             Microsoft.Extensions.Primitives.StringValues data;
             if (this.HttpContext.Request.Headers.TryGetValue("X-Hook-Secret", out data))
@@ -88,6 +88,16 @@ namespace AsanaWebhookAPITesting.Controllers
 
             // Rewind, so the core is not lost when it looks the body for the request
             //req.Body.Position = 0;
+            using (SqlConnection sqlcon = new SqlConnection(_config["DefaultConnection"]))
+            {
+                sqlcon.Open();
+                using (SqlCommand cmd = new SqlCommand("INSERT INTO dbo.ASANA_WebhookAPI([Value],[Time]) VALUES(N'URLREQUESTED',GETDATE()) ", sqlcon))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+            }
             if (string.IsNullOrWhiteSpace(bodyStr))
             {
                 return;
